@@ -1,4 +1,4 @@
-# MyApp
+# fiber
 
 MyApp is a web application built using Go, Fiber, and GORM for the backend, with Swagger UI for API documentation. It provides user registration and login functionality with JWT authentication.
 
@@ -19,7 +19,7 @@ MyApp is a web application built using Go, Fiber, and GORM for the backend, with
 
     ```bash
     git clone https://github.com/yourusername/myapp.git
-    cd myapp
+    cd fiber
     ```
 
 2. **Install dependencies:**
