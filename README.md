@@ -75,7 +75,7 @@ MyApp is a web application built using Go, Fiber, and GORM for the backend, with
 curl -X POST http://localhost:3000/register \
 -H "Content-Type: application/json" \
 -d '{"name": "John Doe", "email": "john@example.com", "password": "yourpassword"}'
-
+ ```
 ## 📜 License
 
 This software is licensed under the [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
