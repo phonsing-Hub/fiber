@@ -79,5 +79,4 @@ curl -X POST http://localhost:3000/register \
 ## 📜 License
 
 This software is licensed under the [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
- © [NHN Cloud](https://github.com/nhn).
 
