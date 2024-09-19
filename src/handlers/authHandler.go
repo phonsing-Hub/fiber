@@ -7,6 +7,7 @@ import (
 	"github.com/fiber/src/utils"
 	"fmt"
 	"time"
+	"strings"
 )
 
 // RegisterHandler godoc
@@ -55,10 +56,16 @@ func RegisterHandler(c *fiber.Ctx, db *gorm.DB) error {
 	}
 
 	if err := db.Create(&user).Error; err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": "Failed to create user"})
+		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") &&
+           strings.Contains(err.Error(), "uni_users_email") {
+            return c.Status(400).JSON(fiber.Map{"error_mail": "มีอีเมลนี้อยู่แล้ว"})
+        }
+
+        // Handle other errors
+        return c.Status(500).JSON(fiber.Map{"error": "Failed to create user"})
 	}
 
-	return c.JSON(fiber.Map{"message": "User registered successfully", "user_id": user.UserID})
+	return c.Status(201).JSON(fiber.Map{"message": "User registered successfully", "user_id": user.UserID})
 }
 
 // LoginHandler godoc
@@ -86,12 +93,12 @@ func LoginHandler(c *fiber.Ctx, db *gorm.DB) error {
 	// Find user by email
 	var user models.User
 	if err := db.Where("email = ?", data.Email).First(&user).Error; err != nil {
-		return c.Status(404).JSON(fiber.Map{"error": "User not found"})
+		return c.Status(404).JSON(fiber.Map{"email": "User not found"})
 	}
 
 	// Check password
 	if !utils.CheckPasswordHash(data.Password, user.Password) {
-		return c.Status(401).JSON(fiber.Map{"error": "Invalid password"})
+		return c.Status(401).JSON(fiber.Map{"password": "Invalid password"})
 	}
 
 	// Generate JWT
@@ -102,11 +109,34 @@ func LoginHandler(c *fiber.Ctx, db *gorm.DB) error {
 
 	// Set JWT in cookie
 	c.Cookie(&fiber.Cookie{
-		Name:     "jwt",
+		Name:     "auth",
 		Value:    token,
 		Expires:  time.Now().Add(time.Hour * 24), // Token expires in 24 hours
 		HTTPOnly: true,
+		Secure:   false,
+		SameSite: "Strict",
 	})
 
 	return c.JSON(fiber.Map{"message": "Login successful"})
+}
+
+func CheckAuth(c *fiber.Ctx) error {
+    // รับ JWT token จาก cookie
+    tokenString := c.Cookies("auth")
+
+    // ตรวจสอบว่า token มีอยู่หรือไม่
+    if tokenString == "" {
+        return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "No token provided"})
+    }
+
+    // ตรวจสอบความถูกต้องของ JWT token
+    token, err := utils.ValidateToken(tokenString)
+    
+    // ตรวจสอบว่า token ถูกต้องหรือไม่
+    if err != nil || !token.Valid {
+        return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid or expired token"})
+    }
+
+    // หาก token ถูกต้อง ส่งกลับข้อความ "OK"
+    return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "OK"})
 }

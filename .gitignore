@@ -1,0 +1,37 @@
+# Go related
+/go.mod
+/go.sum
+*.exe
+*.out
+*.test
+*.log
+
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Output of the Go coverage tool
+*.cover
+
+# Logs
+*.log
+
+# Database settings (if any sensitive information is hardcoded)
+*.db
+*.sqlite
+
+# Environment variables (if you store sensitive information)
+.env
+
+# IDE/editor config files (optional)
+.vscode/
+.idea/
+
+# Dependency directories
+/vendor/
+
+# OS generated files
+.DS_Store
+Thumbs.db

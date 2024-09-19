@@ -22,7 +22,7 @@ func NewDatabase() (*Database, error) {
 		"password=apl@992132 dbname=myDB sslmode=disable")
 
 	db, err := gorm.Open(postgres.Open(psqlInfo), &gorm.Config{
-		Logger: loggerConfig(true),
+		Logger: loggerConfig(false),
 	})
 	if err != nil {
 		return nil, err
