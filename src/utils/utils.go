@@ -25,8 +25,9 @@ func CheckPasswordHash(password, hash string) bool {
 }
 
 // CreateJWT creates a JWT token
-func CreateJWT(userID string) (string, error) {
+func CreateJWT(ID uint, userID string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id": ID,
 		"user_id": userID,
 		"exp":     time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
 	})
@@ -49,31 +50,27 @@ func ValidateToken(tokenString string) (*jwt.Token, error) {
 	return token, nil
 }
 
-func Decoded(tokenString string) (string, error) {
-	// ตรวจสอบความถูกต้องของ token
+func Decoded(tokenString string) (uint, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// ตรวจสอบว่ามีการใช้ signing method ที่ถูกต้อง (เช่น HS256)
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")
 		}
-		// คืนค่า secret key เพื่อให้ตรวจสอบ signature
 		return secret, nil
 	})
 
-	// หาก token ไม่ถูกต้อง ส่งกลับ error
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 
 	// ดึงข้อมูลจาก claims (ส่วน payload)
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		// ตรวจสอบว่ามี user_id ใน claims หรือไม่
-		if userID, ok := claims["user_id"].(string); ok {
-			return userID, nil
+		// ดึงค่า id จาก claims และแปลงเป็น uint
+		if idFloat, ok := claims["id"].(float64); ok {
+			return uint(idFloat), nil
 		}
-		return "", errors.New("user_id not found in token")
+		return 0, errors.New("id not found in token")
 	}
 
 	// คืนค่า error หาก token ไม่ถูกต้อง
-	return "", errors.New("invalid token")
+	return 0, errors.New("invalid token")
 }

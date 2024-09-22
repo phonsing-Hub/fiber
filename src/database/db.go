@@ -2,10 +2,10 @@ package database
 
 import (
 	"fmt"
+	"github.com/fiber/src/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"github.com/fiber/src/models"
 	"log"
 	"os"
 	"time"
@@ -18,7 +18,7 @@ type Database struct {
 
 // NewDatabase creates a new database connection
 func NewDatabase() (*Database, error) {
-	psqlInfo := fmt.Sprintf("host=localhost port=5432 user=root "+
+	psqlInfo := fmt.Sprintf("host=localhost port=5432 user=root " +
 		"password=apl@992132 dbname=myDB sslmode=disable")
 
 	db, err := gorm.Open(postgres.Open(psqlInfo), &gorm.Config{
@@ -28,7 +28,7 @@ func NewDatabase() (*Database, error) {
 		return nil, err
 	}
 
-	err = db.AutoMigrate(&models.User{})
+	err = db.AutoMigrate(&models.User{}, &models.Post{}, &models.Comment{}, &models.Like{}, &models.Follow{})
 	if err != nil {
 		return nil, err
 	}
@@ -42,11 +42,11 @@ func loggerConfig(enable bool) logger.Interface {
 		newLogger := logger.New(
 			log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 			logger.Config{
-				SlowThreshold:             time.Second,   // Slow SQL threshold
-				LogLevel:                  logger.Info,   // Set log level
-				IgnoreRecordNotFoundError: true,          // Ignore ErrRecordNotFound errors
-				ParameterizedQueries:      true,          // Don't include raw SQL queries in logs
-				Colorful:                  true,          // Colorize logs
+				SlowThreshold:             time.Second, // Slow SQL threshold
+				LogLevel:                  logger.Info, // Set log level
+				IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound errors
+				ParameterizedQueries:      true,        // Don't include raw SQL queries in logs
+				Colorful:                  true,        // Colorize logs
 			},
 		)
 		return newLogger

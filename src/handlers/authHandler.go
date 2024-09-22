@@ -102,7 +102,7 @@ func LoginHandler(c *fiber.Ctx, db *gorm.DB) error {
 	}
 
 	// Generate JWT
-	token, err := utils.CreateJWT(user.UserID)
+	token, err := utils.CreateJWT(user.ID, user.UserID)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "Failed to generate token"})
 	}

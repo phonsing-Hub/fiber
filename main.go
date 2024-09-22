@@ -9,36 +9,30 @@ import (
 	"github.com/gofiber/swagger"
 
 	_ "github.com/fiber/docs"
-	"github.com/fiber/src/database"          // แก้เป็น path ที่ถูกต้องสำหรับ database
-	"github.com/fiber/src/router"             // แก้เป็น path ที่ถูกต้องสำหรับ router
+	"github.com/fiber/src/database"          
+	"github.com/fiber/src/router"            
 )
 
 
-
-
-
 func main() {
-	// Initializing Fiber app
-	app := fiber.New()
-
-	// Setup CORS middleware
+	app := fiber.New();
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:5173, http://192.168.1.46:5173, http://localhost:8000", // ลบ '/' ที่ไม่จำเป็นออก
+		AllowOrigins:     "http://localhost:5173, http://192.168.1.46:5173, http://localhost:8000", 
 		AllowHeaders:     "Origin, Content-Type, Accept",
 		AllowCredentials: true,
 	}))
-	app.Use(logger.New())
-	db, err := database.NewDatabase()
+	app.Use(logger.New());
+	db, err := database.NewDatabase();
 	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
+		log.Fatal("Failed to connect to database:", err);
 	}
+	api := app.Group("/api");
+    v1 := api.Group("/v1");
+	router.SetupRoutes(app, db.DB);
+	router.GroupRouterUser(v1, db.DB);
+	router.GroupRouterPosts(v1, db.DB);
+	router.GroupRouterComments(v1, db.DB);
 
-	// Swagger documentation route
-	app.Get("/swagger/*", swagger.HandlerDefault)
-
-	// Setting up routes
-	router.SetupRoutes(app, db.DB)
-
-	// Start the server
-	log.Fatal(app.Listen(":3000"))
+	app.Get("/swagger/*", swagger.HandlerDefault);
+	log.Fatal(app.Listen(":3000"));
 }
